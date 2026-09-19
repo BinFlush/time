@@ -243,7 +243,7 @@
   });
 
   addEventListener('focusout', ({ target }) => {
-    if (!target.matches('input')) return;
+    if (!(target instanceof HTMLInputElement)) return;
     const parsed = minutes(target);
     if (parsed >= 0) target.value = `${pad(Math.floor(parsed / 60))}:${pad(parsed % 60)}`;
   });
