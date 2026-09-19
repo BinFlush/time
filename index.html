@@ -51,20 +51,6 @@
     text-align: center;
   }
 
-  label {
-    position: relative;
-  }
-
-  label::after {
-    content: attr(data-value);
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    color: var(--ink);
-    pointer-events: none;
-  }
-
   input {
     box-sizing: border-box;
     width: 100%;
@@ -86,10 +72,6 @@
   [pattern]:invalid:not(:focus) {
     border-color: var(--error);
     background: color-mix(in srgb, var(--error) 8%, var(--surface));
-  }
-
-  [type=time]:valid {
-    color: transparent;
   }
 
   ::-webkit-calendar-picker-indicator {
@@ -195,15 +177,15 @@
   const pad = number => String(number).padStart(2, '0');
 
   const input = name => touch
-    ? `<input type="time" required aria-label="${name}">`
+    ? `<input type="time" aria-label="${name}">`
     : `<input placeholder="hh:mm" pattern="${time.source}" aria-label="${name}">`;
 
   function addRow() {
     rows.insertAdjacentHTML('beforeend', `
       <p>
-        <label>${input('Start')}</label>
+        ${input('Start')}
         –
-        <label>${input('End')}</label>
+        ${input('End')}
         <output></output>
         <button tabindex="-1" aria-label="Remove row">×</button>
       </p>
@@ -236,10 +218,7 @@
     document.querySelector('#decimal').textContent = `${hours} hours`;
   }
 
-  addEventListener('input', ({ target }) => {
-    if (touch) target.parentElement.dataset.value = target.value;
-    update();
-  });
+  addEventListener('input', update);
 
   addEventListener('focusout', ({ target }) => {
     const parsed = minutes(target);
