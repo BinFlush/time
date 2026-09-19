@@ -43,7 +43,6 @@
   const time = /^([01]?\d|2[0-3])\D?([0-5]\d)$/;
   const input = touch ? '<input type="time" required>' : `<input placeholder="hh:mm" pattern="${time.source}">`;
   const pad = number => String(number).padStart(2, '0');
-  const saved = (() => { try { return JSON.parse(localStorage.rows); } catch { return []; } })();
 
   function addRow() {
     rows.insertAdjacentHTML('beforeend', `<p><label>${input}</label> – <label>${input}</label> <output></output> <button tabindex="-1">×</button></p>`);
@@ -69,17 +68,16 @@
     }
     document.querySelector('#total').innerHTML = format(total);
     document.querySelector('#decimal').textContent = `${(total / 60).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} hours`;
-    const fields = [...document.querySelectorAll('input')];
-    if (touch) for (const field of fields) field.parentElement.dataset.value = field.value;
-    try { localStorage.rows = JSON.stringify(fields.map(field => field.value)); } catch {}
   }
 
-  addEventListener('input', update);
+  addEventListener('input', ({ target }) => {
+    if (touch) target.parentElement.dataset.value = target.value;
+    update();
+  });
 
   addEventListener('focusout', ({ target }) => {
     const parsed = minutes(target);
     if (parsed >= 0) target.value = `${pad(Math.floor(parsed / 60))}:${pad(parsed % 60)}`;
-    update();
   });
 
   addEventListener('keydown', ({ key, target }) => {
@@ -98,8 +96,7 @@
     update();
   });
 
-  do addRow(); while (rows.children.length * 2 < saved.length);
-  document.querySelectorAll('input').forEach((field, i) => field.value = saved[i] ?? '');
+  addRow();
   update();
   navigator.serviceWorker?.register('sw.js').catch(() => {});
 </script>
