@@ -42,6 +42,24 @@
     font-variant-numeric: tabular-nums;
   }
 
+  nav {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+  }
+
+  nav a {
+    padding: .5rem 0;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  nav [aria-current] {
+    border-bottom: 2px solid var(--accent);
+    color: var(--ink);
+  }
+
   p, div {
     display: grid;
     grid-template-columns: minmax(0, 5.75rem) .75rem minmax(0, 5.75rem) minmax(4.5rem, 1fr) 1.75rem;
@@ -163,7 +181,7 @@
     opacity: .75;
   }
 
-  a {
+  body > a {
     display: block;
     margin-top: 2rem;
     color: inherit;
@@ -171,6 +189,11 @@
     text-align: center;
   }
 </style>
+
+<nav>
+  <a aria-current="page">Time</a>
+  <a href="https://binflush.github.io/striptest/">Striptest</a>
+</nav>
 
 <main></main>
 
