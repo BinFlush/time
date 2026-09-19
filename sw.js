@@ -1,6 +1,3 @@
-// Keeps the app working without internet.
-// Network first: she always gets your latest push when online,
-// and the last saved copy when offline.
 const CACHE = 'hours-v1';
 
 self.addEventListener('install', event => {
