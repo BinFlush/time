@@ -250,8 +250,9 @@
   });
 
   addEventListener('click', ({ target }) => {
-    if (target.id === 'add') addRow();
-    if (target.id === 'clear' && confirm('Clear all rows?')) rows.replaceChildren();
+    if (!(target instanceof HTMLButtonElement)) return;
+    if (target.matches('#add')) addRow();
+    if (target.matches('#clear') && confirm('Clear all rows?')) rows.replaceChildren();
     if (target.matches('p button')) target.parentElement.remove();
     if (!rows.children.length) addRow();
     update();
