@@ -211,8 +211,8 @@
   }
 
   function minutes({ value }) {
-    const [, h, m] = value.match(time) ?? [];
-    return h * 60 + +m;
+    const match = value.match(time);
+    return match ? match[1] * 60 + +match[2] : NaN;
   }
 
   function format(span) {
