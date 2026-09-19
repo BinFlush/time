@@ -245,7 +245,8 @@
   addEventListener('focusout', ({ target }) => {
     if (!(target instanceof HTMLInputElement)) return;
     const parsed = minutes(target);
-    if (parsed >= 0) target.value = `${pad(Math.floor(parsed / 60))}:${pad(parsed % 60)}`;
+    if (Number.isNaN(parsed)) return;
+    target.value = `${pad(Math.floor(parsed / 60))}:${pad(parsed % 60)}`;
   });
 
   addEventListener('click', ({ target }) => {
