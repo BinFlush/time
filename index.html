@@ -35,18 +35,18 @@
 </style>
 
 <main></main>
-<div><button id="add">+</button> <button id="clear">Clear all</button></div>
+<div><button id="add" aria-label="Add row">+</button> <button id="clear">Clear all</button></div>
 <section>Total <output id="total"></output> <span id="decimal"></span></section>
 
 <script>
   const rows = document.querySelector('main');
   const touch = matchMedia('(pointer: coarse)').matches;
   const time = /^([01]?\d|2[0-3])\D?([0-5]\d)$/;
-  const input = touch ? '<input type="time" required>' : `<input placeholder="hh:mm" pattern="${time.source}">`;
+  const input = name => touch ? `<input type="time" required aria-label="${name}">` : `<input placeholder="hh:mm" pattern="${time.source}" aria-label="${name}">`;
   const pad = number => String(number).padStart(2, '0');
 
   function addRow() {
-    rows.insertAdjacentHTML('beforeend', `<p><label>${input}</label> – <label>${input}</label> <output></output> <button tabindex="-1">×</button></p>`);
+    rows.insertAdjacentHTML('beforeend', `<p><label>${input('Start')}</label> – <label>${input('End')}</label> <output></output> <button tabindex="-1" aria-label="Remove row">×</button></p>`);
     if (!touch) rows.lastChild.querySelector('input').focus();
   }
 
