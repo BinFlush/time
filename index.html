@@ -212,7 +212,7 @@
   }
 
   function minutes({ value }) {
-    const [, h, m] = value?.match(time) ?? [];
+    const [, h, m] = value.match(time) ?? [];
     return h * 60 + +m;
   }
 
@@ -244,6 +244,7 @@
   });
 
   addEventListener('focusout', ({ target }) => {
+    if (!target.matches('input')) return;
     const parsed = minutes(target);
     if (parsed >= 0) target.value = `${pad(Math.floor(parsed / 60))}:${pad(parsed % 60)}`;
   });
