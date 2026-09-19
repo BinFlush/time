@@ -1,0 +1,101 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Time</title>
+
+<style>
+  :root { --paper: #F5F6FA; --surface: #FFF; --ink: #1B1F3B; --muted: #62678A; --line: #D5D9E8; --dash: #B4B9D4; --accent: #4347E0; --panel: #4347E0; --error: #C2334D; }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #12142A; --surface: #1B1E3C; --ink: #ECEDF8; --muted: #9CA1C4; --line: #30345E; --dash: #474C80; --accent: #8D90FF; --panel: #3B3FCB; --error: #FF8097; }
+  }
+
+  body { max-width: 24rem; margin: 2rem auto; padding: 0 1.25rem; background: var(--paper); color: var(--muted); font: 500 1.25rem ui-rounded, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+  p, div { display: grid; grid-template-columns: minmax(0, 5.75rem) .75rem minmax(0, 5.75rem) minmax(4.5rem, 1fr) 1.75rem; gap: .5rem; align-items: center; margin: 0 0 .5rem; text-align: center; }
+  label { position: relative; }
+  label::after { content: attr(data-value); position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink); pointer-events: none; }
+  input { box-sizing: border-box; width: 100%; height: 2.75rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; text-align: center; outline: none; }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
+  [pattern]:invalid:not(:focus) { border-color: var(--error); background: color-mix(in srgb, var(--error) 8%, var(--surface)); }
+  [type=time]:valid { color: transparent; }
+  ::-webkit-calendar-picker-indicator { display: none; }
+  button { padding: 0; border: 0; border-radius: 10px; background: none; color: var(--muted); font: inherit; cursor: pointer; }
+  button:hover, button:focus-visible { background: color-mix(in srgb, var(--accent) 12%, transparent); outline: none; }
+  #add { grid-column: 1 / 4; height: 2.75rem; border: 1.5px dashed var(--dash); color: var(--accent); font-size: 1.625rem; }
+  #clear { grid-column: 4 / 6; justify-self: end; padding: .25rem .5rem; font-size: 1rem; }
+  output { color: var(--ink); font-size: 1.125rem; text-align: right; }
+  section { position: sticky; bottom: .75rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; margin-top: 1.25rem; padding: .75rem 2.25rem .75rem 1rem; border-radius: 14px; background: var(--panel); box-shadow: 0 0 0 1.25rem var(--paper); color: #FFFC; font-size: 1rem; }
+  #total { color: #FFF; font-size: 2.5rem; font-weight: 600; }
+  #decimal { flex-basis: 100%; text-align: right; }
+  small { font-size: .65em; opacity: .75; }
+</style>
+
+<main></main>
+<div><button id="add">+</button> <button id="clear">Clear all</button></div>
+<section>Total <output id="total"></output> <span id="decimal"></span></section>
+
+<script>
+  const rows = document.querySelector('main');
+  const touch = matchMedia('(pointer: coarse)').matches;
+  const time = /^([01]?\d|2[0-3])\D?([0-5]\d)$/;
+  const input = touch ? '<input type="time" required>' : `<input placeholder="hh:mm" pattern="${time.source}">`;
+  const pad = number => String(number).padStart(2, '0');
+
+  function addRow() {
+    rows.insertAdjacentHTML('beforeend', `<p><label>${input}</label> – <label>${input}</label> <output></output> <button tabindex="-1">×</button></p>`);
+    if (!touch) rows.lastChild.querySelector('input').focus();
+  }
+
+  function minutes({ value }) {
+    const [, h, m] = value.match(time) ?? [];
+    return h * 60 + +m;
+  }
+
+  function format(span) {
+    return `${Math.floor(span / 60)}<small>h</small> ${pad(span % 60)}<small>m</small>`;
+  }
+
+  function update() {
+    let total = 0;
+    for (const row of rows.children) {
+      const [start, end] = row.querySelectorAll('input');
+      const span = (minutes(end) - minutes(start) + 1440) % 1440;
+      row.querySelector('output').innerHTML = span >= 0 ? format(span) : '';
+      total += span || 0;
+    }
+    document.querySelector('#total').innerHTML = format(total);
+    document.querySelector('#decimal').textContent = `${(total / 60).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} hours`;
+  }
+
+  addEventListener('input', ({ target }) => {
+    if (touch) target.parentElement.dataset.value = target.value;
+    update();
+  });
+
+  addEventListener('focusout', ({ target }) => {
+    const parsed = minutes(target);
+    if (parsed >= 0) target.value = `${pad(Math.floor(parsed / 60))}:${pad(parsed % 60)}`;
+  });
+
+  addEventListener('keydown', ({ key, target }) => {
+    if (key !== 'Enter' || !target.matches('input')) return;
+    const inputs = [...document.querySelectorAll('input')];
+    const next = inputs[inputs.indexOf(target) + 1];
+    if (next) next.focus();
+    else if (target.value) addRow();
+  });
+
+  addEventListener('click', ({ target }) => {
+    if (target.id === 'add') addRow();
+    if (target.id === 'clear' && confirm('Clear all rows?')) rows.replaceChildren();
+    if (target.matches('p button')) target.parentElement.remove();
+    if (!rows.children.length) addRow();
+    update();
+  });
+
+  addRow();
+  update();
+  navigator.serviceWorker?.register('sw.js').catch(() => {});
+</script>
