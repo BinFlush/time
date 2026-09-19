@@ -225,8 +225,9 @@
     for (const row of rows.children) {
       const [start, end] = row.querySelectorAll('input');
       const span = (minutes(end) - minutes(start) + 1440) % 1440;
-      row.querySelector('output').innerHTML = span >= 0 ? format(span) : '';
-      total += span || 0;
+      const valid = !Number.isNaN(span);
+      row.querySelector('output').innerHTML = valid ? format(span) : '';
+      if (valid) total += span;
     }
     const hours = (total / 60).toLocaleString(undefined, {
       minimumFractionDigits: 2,
