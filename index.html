@@ -207,7 +207,7 @@
   }
 
   function minutes({ value }) {
-    const [, h, m] = value.match(time) ?? [];
+    const [, h, m] = value?.match(time) ?? [];
     return h * 60 + +m;
   }
 
